@@ -1,7 +1,7 @@
 {
     "format": 1,
     "name": "nxbby's plugins",
-    "description": "Valenced plugins made by nxbby. Add this repository to browse and install them.",
+    "description": "valenced plugins by nxbby",
     "plugins": {
         "dev.nxbby.command-lib": {
             "name": "nxbby's Command Lib",
