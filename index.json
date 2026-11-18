@@ -1,84 +1,97 @@
 {
-    "format": 1,
-    "name": "nxbby's plugins",
-    "description": "valenced plugins by nxbby",
-    "plugins": {
-        "dev.nxbby.command-lib": {
-            "name": "nxbby's Command Lib",
-            "description": "Library plugin that lets other plugins register slash commands. Installed automatically as a dependency.",
-            "author": "nxbby",
-            "icon": "ImageIcon",
-            "channels": {
-                "latest": "1.0.0"
+  "format": 1,
+  "name": "nxbby's plugins",
+  "description": "valenced plugins by nxbby",
+  "plugins": {
+    "dev.nxbby.command-lib": {
+      "name": "nxbby's Command Lib",
+      "description": "Library plugin that lets other plugins register slash commands. Installed automatically as a dependency.",
+      "author": "nxbby",
+      "icon": "ImageIcon",
+      "channels": {
+        "latest": "1.0.1"
+      },
+      "versions": {
+        "1.0.0": {
+          "url": "https://nxbby.github.io/nxbby-valenced-plugins/pool/dev.nxbby.command-lib@1.0.0.zip",
+          "sha256": "c68939633b674ee4e5086aafb505f73d4c0879ffbea3ceab4caab3a0eca63478",
+          "size": 1211,
+          "dependencies": {
+            "valenced.api": {
+              "version": ">=1 <2"
             },
-            "versions": {
-                "1.0.0": {
-                    "url": "https://nxbby.github.io/nxbby-valenced-plugins/pool/dev.nxbby.command-lib@1.0.0.zip",
-                    "sha256": "c68939633b674ee4e5086aafb505f73d4c0879ffbea3ceab4caab3a0eca63478",
-                    "size": 1211,
-                    "dependencies": {
-                        "valenced.api": {
-                            "version": ">=1 <2"
-                        },
-                        "discord": {
-                            "version": "*"
-                        }
-                    }
-                }
+            "discord": {
+              "version": "*"
             }
+          }
         },
-        "dev.nxbby.femboy": {
-            "name": "Femboy",
-            "description": "Adds a /femboy slash command that posts a random image from r/femboys, with an optional NSFW mode for age-restricted channels.",
-            "author": "nxbby",
-            "icon": "ImageIcon",
-            "channels": {
-                "latest": "0.2.0"
+        "1.0.1": {
+          "url": "https://nxbby.github.io/nxbby-valenced-plugins/pool/dev.nxbby.command-lib@1.0.1.zip",
+          "sha256": "454d9d862c2a423854884dedda4888fd69d76ced704cb77c7a973aa5413c9949",
+          "size": 1273,
+          "dependencies": {
+            "valenced.api": {
+              "version": ">=1 <2"
             },
-            "versions": {
-                "0.1.0": {
-                    "url": "https://nxbby.github.io/nxbby-valenced-plugins/pool/dev.nxbby.femboy@0.1.0.zip",
-                    "sha256": "de12535c27623f6b13e1a0551775dcd4822ccce97661a55b156ebfdf594dbc8e",
-                    "size": 1489,
-                    "dependencies": {
-                        "valenced.api": {
-                            "version": ">=1 <2"
-                        },
-                        "discord": {
-                            "version": "*"
-                        }
-                    }
-                },
-                "0.1.1": {
-                    "url": "https://nxbby.github.io/nxbby-valenced-plugins/pool/dev.nxbby.femboy@0.1.1.zip",
-                    "sha256": "b9f7ce7d290942b7142a07c094588ca7f00287b4ce5ddcfde1e4261ee120006e",
-                    "size": 1568,
-                    "dependencies": {
-                        "valenced.api": {
-                            "version": ">=1 <2"
-                        },
-                        "discord": {
-                            "version": "*"
-                        }
-                    }
-                },
-                "0.2.0": {
-                    "url": "https://nxbby.github.io/nxbby-valenced-plugins/pool/dev.nxbby.femboy@0.2.0.zip",
-                    "sha256": "9ac96dcfc1ce383f349dedb9dec7254a6fad2473c83eb7d98fc3267ab5c13df4",
-                    "size": 1332,
-                    "dependencies": {
-                        "valenced.api": {
-                            "version": ">=1 <2"
-                        },
-                        "discord": {
-                            "version": "*"
-                        },
-                        "dev.nxbby.command-lib": {
-                            "version": ">=1 <2"
-                        }
-                    }
-                }
+            "discord": {
+              "version": "*"
             }
+          }
         }
+      }
+    },
+    "dev.nxbby.femboy": {
+      "name": "Femboy",
+      "description": "Adds a /femboy slash command that posts a random image from r/femboys, with an optional NSFW mode for age-restricted channels.",
+      "author": "nxbby",
+      "icon": "ImageIcon",
+      "channels": {
+        "latest": "0.2.0"
+      },
+      "versions": {
+        "0.1.0": {
+          "url": "https://nxbby.github.io/nxbby-valenced-plugins/pool/dev.nxbby.femboy@0.1.0.zip",
+          "sha256": "de12535c27623f6b13e1a0551775dcd4822ccce97661a55b156ebfdf594dbc8e",
+          "size": 1489,
+          "dependencies": {
+            "valenced.api": {
+              "version": ">=1 <2"
+            },
+            "discord": {
+              "version": "*"
+            }
+          }
+        },
+        "0.1.1": {
+          "url": "https://nxbby.github.io/nxbby-valenced-plugins/pool/dev.nxbby.femboy@0.1.1.zip",
+          "sha256": "b9f7ce7d290942b7142a07c094588ca7f00287b4ce5ddcfde1e4261ee120006e",
+          "size": 1568,
+          "dependencies": {
+            "valenced.api": {
+              "version": ">=1 <2"
+            },
+            "discord": {
+              "version": "*"
+            }
+          }
+        },
+        "0.2.0": {
+          "url": "https://nxbby.github.io/nxbby-valenced-plugins/pool/dev.nxbby.femboy@0.2.0.zip",
+          "sha256": "9ac96dcfc1ce383f349dedb9dec7254a6fad2473c83eb7d98fc3267ab5c13df4",
+          "size": 1332,
+          "dependencies": {
+            "valenced.api": {
+              "version": ">=1 <2"
+            },
+            "discord": {
+              "version": "*"
+            },
+            "dev.nxbby.command-lib": {
+              "version": ">=1 <2"
+            }
+          }
+        }
+      }
     }
+  }
 }
