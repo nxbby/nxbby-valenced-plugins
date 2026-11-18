@@ -1,0 +1,20 @@
+{
+	"format": 1,
+	"id": "dev.nxbby.femboy",
+	"name": "Femboy",
+	"description": "Adds a /femboy slash command that posts a random image from r/femboys, with an optional NSFW mode for age-restricted channels.",
+	"author": "nxbby",
+	"icon": "ImageIcon",
+	"version": "0.1.0",
+	"dependencies": {
+		"valenced.api": {
+			"version": ">=1 <2"
+		},
+		"discord": {
+			"version": "*"
+		}
+	},
+	"dist": {
+		"script": "index.js"
+	}
+}
