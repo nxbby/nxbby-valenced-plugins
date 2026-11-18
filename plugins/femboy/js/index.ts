@@ -1,14 +1,15 @@
 import { ToastActionCreators } from '@valenced/discord/actions'
 
-const SUBREDDIT = 'femboys'
+const SUBREDDITS = { nsfw: 'femboys', sfw: 'sfwfeminineboys' } as const
+
 // Tried in order until one works
-const FEEDS = [
-	`https://www.reddit.com/r/${SUBREDDIT}/hot.json?limit=100&raw_json=1`,
-	`https://api.reddit.com/r/${SUBREDDIT}/hot?limit=100&raw_json=1`,
-	`https://old.reddit.com/r/${SUBREDDIT}/hot.json?limit=100&raw_json=1`,
+const feeds = (sub: string) => [
+	`https://www.reddit.com/r/${sub}/hot.json?limit=100&raw_json=1`,
+	`https://api.reddit.com/r/${sub}/hot?limit=100&raw_json=1`,
+	`https://old.reddit.com/r/${sub}/hot.json?limit=100&raw_json=1`,
 ]
 // Third-party relay, only used if Reddit itself cannot be reached
-const RELAY = `https://meme-api.com/gimme/${SUBREDDIT}/50`
+const relay = (sub: string) => `https://meme-api.com/gimme/${sub}/50`
 const HEADERS = {
 	Accept: 'application/json',
 	'User-Agent':
@@ -27,23 +28,24 @@ interface RedditPost {
 	spoiler?: boolean
 }
 
-let cache: { at: number; posts: RedditPost[] } | undefined
+const cache = new Map<string, { at: number; posts: RedditPost[] }>()
 let lastUrl: string | undefined
 
 function toast(text: string) {
 	ToastActionCreators.open('femboy-command', { text, variant: 'critical' })
 }
 
-async function fetchPosts(): Promise<RedditPost[]> {
-	if (cache && Date.now() - cache.at < CACHE_MS) return cache.posts
+async function fetchPosts(sub: string): Promise<RedditPost[]> {
+	const hit = cache.get(sub)
+	if (hit && Date.now() - hit.at < CACHE_MS) return hit.posts
 
 	const errors: string[] = []
 	const remember = (posts: RedditPost[]) => {
-		cache = { at: Date.now(), posts }
+		cache.set(sub, { at: Date.now(), posts })
 		return posts
 	}
 
-	for (const url of FEEDS) {
+	for (const url of feeds(sub)) {
 		try {
 			const json = (await getJson(url)) as {
 				data: { children: { data: RedditPost }[] }
@@ -55,7 +57,7 @@ async function fetchPosts(): Promise<RedditPost[]> {
 	}
 
 	try {
-		const json = (await getJson(RELAY)) as {
+		const json = (await getJson(relay(sub))) as {
 			memes: { url: string; nsfw: boolean; spoiler: boolean }[]
 		}
 		return remember(
@@ -98,8 +100,9 @@ function isImagePost(p: RedditPost) {
 }
 
 function pick(posts: RedditPost[], nsfw: boolean) {
-	// SFW mode only uses posts Reddit does not flag as 18+
-	const pool = posts.filter(p => p.over_18 === nsfw && p.url !== lastUrl)
+	// NSFW mode takes any post from r/femboys. SFW mode also drops anything
+	// Reddit flags as 18+, in case a post slips into the SFW subreddit.
+	const pool = posts.filter(p => (nsfw || !p.over_18) && p.url !== lastUrl)
 	if (!pool.length) return undefined
 	return pool[Math.floor(Math.random() * pool.length)]!
 }
@@ -109,7 +112,7 @@ export default plugin({
 		cleanup(
 			commands.register({
 				name: 'femboy',
-				description: 'Send a random image from r/femboys',
+				description: 'Send a random femboy image (SFW by default)',
 				options: [
 					{
 						name: 'nsfw',
@@ -127,7 +130,8 @@ export default plugin({
 					}
 
 					try {
-						const post = pick(await fetchPosts(), nsfw)
+						const sub = nsfw ? SUBREDDITS.nsfw : SUBREDDITS.sfw
+						const post = pick(await fetchPosts(sub), nsfw)
 						if (!post) {
 							toast(`No ${nsfw ? 'NSFW' : 'SFW'} images found right now.`)
 							return
