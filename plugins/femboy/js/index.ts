@@ -2,20 +2,38 @@ import { ToastActionCreators } from '@valenced/discord/actions'
 
 const SUBREDDITS = { nsfw: 'femboys', sfw: 'sfwfeminineboys' } as const
 
+// Same sorts as Reddit's own sort menu
+const SORTS = ['best', 'hot', 'new', 'top', 'controversial', 'rising'] as const
+// Time ranges Reddit offers for Top and Controversial
+const TIMES = ['hour', 'day', 'week', 'month', 'year', 'all'] as const
+
+type Sort = (typeof SORTS)[number]
+type Time = (typeof TIMES)[number]
+
+const isSort = (v: string): v is Sort => (SORTS as readonly string[]).includes(v)
+const isTime = (v: string): v is Time => (TIMES as readonly string[]).includes(v)
+
 // Tried in order until one works
-const feeds = (sub: string) => [
-	`https://www.reddit.com/r/${sub}/hot.json?limit=100&raw_json=1`,
-	`https://api.reddit.com/r/${sub}/hot?limit=100&raw_json=1`,
-	`https://old.reddit.com/r/${sub}/hot.json?limit=100&raw_json=1`,
-]
+const feeds = (sub: string, sort: Sort, time: Time) => {
+	// Reddit's "Best" is the same order as "Hot" inside a subreddit
+	const path = sort === 'best' ? 'hot' : sort
+	const t = sort === 'top' || sort === 'controversial' ? `&t=${time}` : ''
+	return [
+		`https://www.reddit.com/r/${sub}/${path}.json?limit=100&raw_json=1${t}`,
+		`https://api.reddit.com/r/${sub}/${path}?limit=100&raw_json=1${t}`,
+		`https://old.reddit.com/r/${sub}/${path}.json?limit=100&raw_json=1${t}`,
+	]
+}
 // Third-party relay, only used if Reddit itself cannot be reached
 const relay = (sub: string) => `https://meme-api.com/gimme/${sub}/50`
+
 const HEADERS = {
 	Accept: 'application/json',
 	'User-Agent':
 		'Mozilla/5.0 (Linux; Android 14) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Mobile Safari/537.36',
 }
 const CACHE_MS = 5 * 60 * 1000
+const MAX_RECENT = 40
 const IMAGE_EXT = /\.(png|jpe?g|gif|webp)(\?.*)?$/i
 const IMAGE_HOSTS = ['i.redd.it', 'i.imgur.com']
 
@@ -29,23 +47,29 @@ interface RedditPost {
 }
 
 const cache = new Map<string, { at: number; posts: RedditPost[] }>()
-let lastUrl: string | undefined
+// Images sent recently, so the same one is not picked again right away
+const recent: string[] = []
 
 function toast(text: string) {
 	ToastActionCreators.open('femboy-command', { text, variant: 'critical' })
 }
 
-async function fetchPosts(sub: string): Promise<RedditPost[]> {
-	const hit = cache.get(sub)
+async function fetchPosts(
+	sub: string,
+	sort: Sort,
+	time: Time,
+): Promise<RedditPost[]> {
+	const key = `${sub}/${sort}/${time}`
+	const hit = cache.get(key)
 	if (hit && Date.now() - hit.at < CACHE_MS) return hit.posts
 
 	const errors: string[] = []
 	const remember = (posts: RedditPost[]) => {
-		cache.set(sub, { at: Date.now(), posts })
+		cache.set(key, { at: Date.now(), posts })
 		return posts
 	}
 
-	for (const url of feeds(sub)) {
+	for (const url of feeds(sub, sort, time)) {
 		try {
 			const json = (await getJson(url)) as {
 				data: { children: { data: RedditPost }[] }
@@ -102,9 +126,20 @@ function isImagePost(p: RedditPost) {
 function pick(posts: RedditPost[], nsfw: boolean) {
 	// NSFW mode takes any post from r/femboys. SFW mode also drops anything
 	// Reddit flags as 18+, in case a post slips into the SFW subreddit.
-	const pool = posts.filter(p => (nsfw || !p.over_18) && p.url !== lastUrl)
+	const eligible = posts.filter(p => nsfw || !p.over_18)
+
+	let pool = eligible.filter(p => !recent.includes(p.url))
+	if (!pool.length) {
+		// Everything here was sent recently: start over
+		recent.length = 0
+		pool = eligible
+	}
 	if (!pool.length) return undefined
-	return pool[Math.floor(Math.random() * pool.length)]!
+
+	const post = pool[Math.floor(Math.random() * pool.length)]!
+	recent.push(post.url)
+	if (recent.length > MAX_RECENT) recent.shift()
+	return post
 }
 
 export default plugin({
@@ -120,10 +155,37 @@ export default plugin({
 						type: 5, // BOOLEAN
 						required: false,
 					},
+					{
+						name: 'sort',
+						description: `Reddit sort: ${SORTS.join(', ')} (default: hot)`,
+						type: 3, // STRING
+						required: false,
+					},
+					{
+						name: 'time',
+						description: `Range for top and controversial: ${TIMES.join(', ')} (default: day)`,
+						type: 3, // STRING
+						required: false,
+					},
 				],
 				async execute(args, ctx) {
-					const nsfw = args.find(a => a.name === 'nsfw')?.value === true
+					const value = (name: string) => {
+						const v = args.find(a => a.name === name)?.value
+						return typeof v === 'string' ? v.trim().toLowerCase() : undefined
+					}
 
+					const nsfw = args.find(a => a.name === 'nsfw')?.value === true
+					const sort = value('sort') ?? 'hot'
+					const time = value('time') ?? 'day'
+
+					if (!isSort(sort)) {
+						toast(`Unknown sort. Use: ${SORTS.join(', ')}`)
+						return
+					}
+					if (!isTime(time)) {
+						toast(`Unknown time range. Use: ${TIMES.join(', ')}`)
+						return
+					}
 					if (nsfw && !ctx.channel?.nsfw) {
 						toast('NSFW images can only be sent in age-restricted channels.')
 						return
@@ -131,12 +193,11 @@ export default plugin({
 
 					try {
 						const sub = nsfw ? SUBREDDITS.nsfw : SUBREDDITS.sfw
-						const post = pick(await fetchPosts(sub), nsfw)
+						const post = pick(await fetchPosts(sub, sort, time), nsfw)
 						if (!post) {
 							toast(`No ${nsfw ? 'NSFW' : 'SFW'} images found right now.`)
 							return
 						}
-						lastUrl = post.url
 						// Discord embeds the image from the direct link
 						return { content: post.url }
 					} catch (e) {

@@ -17,5 +17,5 @@ Plugins for [Valenced](https://github.com/Valenced/valenced), the Discord mobile
 
 | Plugin | Description |
 | --- | --- |
-| **Femboy** | Adds a `/femboy` slash command that posts a random image from r/sfwfeminineboys. The `nsfw` option switches to r/femboys and only works in age-restricted channels. Needs nxbby's Command Lib (installed automatically). |
+| **Femboy** | Adds a `/femboy` slash command that posts a random image from r/sfwfeminineboys. The `nsfw` option switches to r/femboys and only works in age-restricted channels. The `sort` option (best, hot, new, top, controversial, rising) and `time` option (for top and controversial) work like Reddit's sort menu. Needs nxbby's Command Lib (installed automatically). |
 | **nxbby's Command Lib** | Library plugin that lets other plugins register slash commands. |
