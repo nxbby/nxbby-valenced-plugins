@@ -9,12 +9,19 @@ export interface CommandContext {
 	channel?: { id?: string; nsfw?: boolean }
 }
 
+export interface CommandChoice {
+	name: string
+	value: string | number
+}
+
 export interface CommandOption {
 	name: string
 	description: string
 	/** Discord option type, e.g. 3 = string, 4 = integer, 5 = boolean */
 	type: number
 	required?: boolean
+	/** Pick list shown to the user (string and integer options only) */
+	choices?: CommandChoice[]
 	displayName?: string
 	displayDescription?: string
 }

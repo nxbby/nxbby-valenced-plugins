@@ -10,6 +10,24 @@ const TIMES = ['hour', 'day', 'week', 'month', 'year', 'all'] as const
 type Sort = (typeof SORTS)[number]
 type Time = (typeof TIMES)[number]
 
+// Labels shown in the pick lists
+const SORT_LABELS: Record<Sort, string> = {
+	best: 'Best',
+	hot: 'Hot',
+	new: 'New',
+	top: 'Top',
+	controversial: 'Controversial',
+	rising: 'Rising',
+}
+const TIME_LABELS: Record<Time, string> = {
+	hour: 'Past hour',
+	day: 'Past 24 hours',
+	week: 'Past week',
+	month: 'Past month',
+	year: 'Past year',
+	all: 'All time',
+}
+
 const isSort = (v: string): v is Sort => (SORTS as readonly string[]).includes(v)
 const isTime = (v: string): v is Time => (TIMES as readonly string[]).includes(v)
 
@@ -157,15 +175,17 @@ export default plugin({
 					},
 					{
 						name: 'sort',
-						description: `Reddit sort: ${SORTS.join(', ')} (default: hot)`,
+						description: 'How to sort posts, like Reddit (default: hot)',
 						type: 3, // STRING
 						required: false,
+						choices: SORTS.map(v => ({ name: SORT_LABELS[v], value: v })),
 					},
 					{
 						name: 'time',
-						description: `Range for top and controversial: ${TIMES.join(', ')} (default: day)`,
+						description: 'Time range for top and controversial (default: day)',
 						type: 3, // STRING
 						required: false,
+						choices: TIMES.map(v => ({ name: TIME_LABELS[v], value: v })),
 					},
 				],
 				async execute(args, ctx) {

@@ -60,6 +60,16 @@ function build(command: Command): RawCommand {
 			displayDescription: o.displayDescription ?? o.description,
 			type: o.type,
 			required: o.required ?? false,
+			// Only set when used, so options without a pick list stay unchanged
+			...(o.choices?.length
+				? {
+						choices: o.choices.map(c => ({
+							name: c.name,
+							displayName: c.name,
+							value: c.value,
+						})),
+					}
+				: {}),
 		})),
 		execute: command.execute,
 	}
