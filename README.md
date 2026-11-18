@@ -8,7 +8,7 @@ Plugins for [Valenced](https://github.com/Valenced/valenced), the Discord mobile
 2. Add this repository URL:
 
    ```
-   https://nxbby.github.io/nxbby-valenced-plugins/index.json
+   https://nxbby.github.io/nxbby-valenced-plugins/
    ```
 
 3. Tap **+** to browse plugins, install one, enable it, and reload Discord.
