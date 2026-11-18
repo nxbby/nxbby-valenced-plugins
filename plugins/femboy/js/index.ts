@@ -1,7 +1,19 @@
 import { ToastActionCreators } from '@valenced/discord/actions'
 
-const FEED_URL =
-	'https://www.reddit.com/r/femboys/hot.json?limit=100&raw_json=1'
+const SUBREDDIT = 'femboys'
+// Tried in order until one works
+const FEEDS = [
+	`https://www.reddit.com/r/${SUBREDDIT}/hot.json?limit=100&raw_json=1`,
+	`https://api.reddit.com/r/${SUBREDDIT}/hot?limit=100&raw_json=1`,
+	`https://old.reddit.com/r/${SUBREDDIT}/hot.json?limit=100&raw_json=1`,
+]
+// Third-party relay, only used if Reddit itself cannot be reached
+const RELAY = `https://meme-api.com/gimme/${SUBREDDIT}/50`
+const HEADERS = {
+	Accept: 'application/json',
+	'User-Agent':
+		'Mozilla/5.0 (Linux; Android 14) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Mobile Safari/537.36',
+}
 const CACHE_MS = 5 * 60 * 1000
 const IMAGE_EXT = /\.(png|jpe?g|gif|webp)(\?.*)?$/i
 const IMAGE_HOSTS = ['i.redd.it', 'i.imgur.com']
@@ -25,16 +37,54 @@ function toast(text: string) {
 async function fetchPosts(): Promise<RedditPost[]> {
 	if (cache && Date.now() - cache.at < CACHE_MS) return cache.posts
 
-	const res = await fetch(FEED_URL)
-	if (!res.ok) throw new Error(`Reddit responded with ${res.status}`)
-
-	const json = (await res.json()) as {
-		data: { children: { data: RedditPost }[] }
+	const errors: string[] = []
+	const remember = (posts: RedditPost[]) => {
+		cache = { at: Date.now(), posts }
+		return posts
 	}
-	const posts = json.data.children.map(c => c.data).filter(isImagePost)
 
-	cache = { at: Date.now(), posts }
-	return posts
+	for (const url of FEEDS) {
+		try {
+			const json = (await getJson(url)) as {
+				data: { children: { data: RedditPost }[] }
+			}
+			return remember(json.data.children.map(c => c.data).filter(isImagePost))
+		} catch (e) {
+			errors.push(`${new URL(url).hostname} ${errorText(e)}`)
+		}
+	}
+
+	try {
+		const json = (await getJson(RELAY)) as {
+			memes: { url: string; nsfw: boolean; spoiler: boolean }[]
+		}
+		return remember(
+			json.memes
+				.map(m => ({
+					url: m.url,
+					over_18: m.nsfw,
+					spoiler: m.spoiler,
+					is_video: false,
+					is_self: false,
+					stickied: false,
+				}))
+				.filter(isImagePost),
+		)
+	} catch (e) {
+		errors.push(`relay ${errorText(e)}`)
+	}
+
+	throw new Error(errors.join(', '))
+}
+
+async function getJson(url: string): Promise<unknown> {
+	const res = await fetch(url, { headers: HEADERS })
+	if (!res.ok) throw new Error(String(res.status))
+	return res.json()
+}
+
+function errorText(e: unknown) {
+	return e instanceof Error ? e.message : String(e)
 }
 
 function isImagePost(p: RedditPost) {
@@ -86,8 +136,8 @@ export default plugin({
 						// Discord embeds the image from the direct link
 						return { content: post.url }
 					} catch (e) {
-						toast('Could not load images from Reddit.')
 						console.error('[femboy]', e)
+						toast(`Could not load images: ${errorText(e)}`.slice(0, 160))
 					}
 				},
 			}),
