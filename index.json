@@ -9,7 +9,7 @@
       "author": "nxbby",
       "icon": "ImageIcon",
       "channels": {
-        "latest": "1.0.1"
+        "latest": "1.0.2"
       },
       "versions": {
         "1.0.0": {
@@ -29,6 +29,19 @@
           "url": "https://nxbby.github.io/nxbby-valenced-plugins/pool/dev.nxbby.command-lib@1.0.1.zip",
           "sha256": "454d9d862c2a423854884dedda4888fd69d76ced704cb77c7a973aa5413c9949",
           "size": 1273,
+          "dependencies": {
+            "valenced.api": {
+              "version": ">=1 <2"
+            },
+            "discord": {
+              "version": "*"
+            }
+          }
+        },
+        "1.0.2": {
+          "url": "https://nxbby.github.io/nxbby-valenced-plugins/pool/dev.nxbby.command-lib@1.0.2.zip",
+          "sha256": "f5db005a3f95134fdcc250570ba3e9458b25e7b9df82cb8a3122540504150f3c",
+          "size": 1244,
           "dependencies": {
             "valenced.api": {
               "version": ">=1 <2"
