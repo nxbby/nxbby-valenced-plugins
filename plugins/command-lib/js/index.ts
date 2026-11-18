@@ -115,11 +115,11 @@ export default plugin({
 			}),
 		)
 
-		// Gives every dependent plugin `api.commands`, removed when it stops
+		// Gives every dependent plugin `api.nxbbyCommands`, removed when it stops
 		decorate(plugin => {
 			const mine = new Set<() => void>()
 
-			plugin.api.commands = {
+			plugin.api.nxbbyCommands = {
 				register(command) {
 					const off = register(command)
 					const remove = () => {

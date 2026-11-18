@@ -161,9 +161,9 @@ function pick(posts: RedditPost[], nsfw: boolean) {
 }
 
 export default plugin({
-	start({ cleanup, commands }) {
+	start({ cleanup, nxbbyCommands }) {
 		cleanup(
-			commands.register({
+			nxbbyCommands.register({
 				name: 'femboy',
 				description: 'Send a random femboy image (SFW by default)',
 				options: [

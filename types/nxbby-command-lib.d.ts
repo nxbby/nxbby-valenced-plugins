@@ -1,4 +1,4 @@
-// Types for dev.nxbby.command-lib. Plugins that depend on it get `api.commands`.
+// Types for dev.nxbby.command-lib. Plugins that depend on it get `api.nxbbyCommands`.
 
 export interface CommandArg {
 	name: string
@@ -41,6 +41,6 @@ export interface CommandsApi {
 
 declare module '@valenced/plugins/types' {
 	interface PluginApi {
-		commands: CommandsApi
+		nxbbyCommands: CommandsApi
 	}
 }
