@@ -3,13 +3,11 @@
 name: Validate
 
 on:
-  # WARNING: Since you generated this template, likely not in an organization that hosts the Valenced API package, you'll need your PAT to fetch the Valenced API dependency.
+  # WARNING: This repository is not in an organization that hosts the Valenced API package, so a PAT is needed to fetch the Valenced API dependency.
   # Set it in your repository secrets as READ_PACKAGES_TOKEN, make sure it can ONLY read packages, as malicious actors could reveal your token if you approve to run actions from a PR.
   pull_request_target:
     paths:
       - 'plugins/**'
-      - 'themes/**'
-      - 'cli/**'
       - '.github/**'
       - 'repo.config.json'
       - '*.gradle.kts'
