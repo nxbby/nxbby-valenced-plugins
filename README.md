@@ -1,4 +1,4 @@
-# nxbby's Valenced plugins
+# nxbby's plugins
 
 Plugins for [Valenced](https://github.com/Valenced/valenced), the Discord mobile client mod.
 
