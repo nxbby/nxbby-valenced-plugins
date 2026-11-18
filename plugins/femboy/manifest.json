@@ -5,7 +5,7 @@
 	"description": "Adds a /femboy slash command that posts a random image from r/sfwfeminineboys, or from r/femboys with the nsfw option in age-restricted channels.",
 	"author": "nxbby",
 	"icon": "ImageIcon",
-	"version": "1.0.1",
+	"version": "1.0.2",
 	"dependencies": {
 		"valenced.api": {
 			"version": ">=1 <2"
@@ -14,7 +14,7 @@
 			"version": "*"
 		},
 		"dev.nxbby.command-lib": {
-			"version": ">=1 <2"
+			"version": ">=1.0.1 <2"
 		}
 	},
 	"dist": {
