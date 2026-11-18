@@ -75,19 +75,24 @@ export default plugin({
 			getModules(withProps<CommandsModule>('getBuiltInCommands'), commands => {
 				try {
 					cleanup(
-						after(commands, 'getBuiltInCommands', (_, ret) => {
+						after(commands, 'getBuiltInCommands', (args, ret) => {
 							if (!Array.isArray(ret) || !registered.length) return ret
 							try {
+								const extra = registered.map((c, i) =>
+									build(c, ret as RawCommand[], i),
+								)
 								if (!loggedTemplate) {
 									loggedTemplate = true
-									logger.log(
-										`Built-in command fields: ${Object.keys(ret[0] ?? {}).join(', ')}`,
-									)
+									// Diagnostic: shows what Discord's own commands look like
+									const dump = (v: unknown) =>
+										JSON.stringify(v, (_, x) =>
+											typeof x === 'function' ? '[fn]' : x,
+										)?.slice(0, 1500)
+									logger.log(`args: ${dump(args)} | built-ins: ${ret.length}`)
+									logger.log(`built-in[0]: ${dump(ret[0])}`)
+									logger.log(`ours[0]: ${dump(extra[0])}`)
 								}
-								return [
-									...ret,
-									...registered.map((c, i) => build(c, ret as RawCommand[], i)),
-								]
+								return [...ret, ...extra]
 							} catch (e) {
 								// Never break the chat input over a bad command
 								logger.error('Failed to build commands', e)
