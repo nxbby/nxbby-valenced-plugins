@@ -55,11 +55,11 @@
     },
     "dev.nxbby.femboy": {
       "name": "Femboy",
-      "description": "Adds a /femboy slash command that posts a random image from r/femboys, with an optional NSFW mode for age-restricted channels.",
+      "description": "Adds a /femboy slash command that posts a random image from r/sfwfeminineboys, or from r/femboys with the nsfw option in age-restricted channels.",
       "author": "nxbby",
       "icon": "ImageIcon",
       "channels": {
-        "latest": "0.2.1"
+        "latest": "0.3.0"
       },
       "versions": {
         "0.1.0": {
@@ -108,6 +108,22 @@
           "url": "https://nxbby.github.io/nxbby-valenced-plugins/pool/dev.nxbby.femboy@0.2.1.zip",
           "sha256": "0ae7539dd20762fe6b49ce5727e45188df15223df84290232a157bcc9e567e67",
           "size": 1632,
+          "dependencies": {
+            "valenced.api": {
+              "version": ">=1 <2"
+            },
+            "discord": {
+              "version": "*"
+            },
+            "dev.nxbby.command-lib": {
+              "version": ">=1 <2"
+            }
+          }
+        },
+        "0.3.0": {
+          "url": "https://nxbby.github.io/nxbby-valenced-plugins/pool/dev.nxbby.femboy@0.3.0.zip",
+          "sha256": "25db6ffb6b02d66c08dd3249ab9a64ce28f865292bff5991832b1a0ce8a7f333",
+          "size": 1707,
           "dependencies": {
             "valenced.api": {
               "version": ">=1 <2"
