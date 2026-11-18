@@ -10,8 +10,6 @@ on:
       - 'plugins/**'
       - '.github/**'
       - 'repo.config.json'
-      - '*.gradle.kts'
-      - 'gradle/**'
       - 'package.json'
       - 'bun.lock'
       - 'tsconfig.json'
@@ -32,18 +30,12 @@ jobs:
 
       - uses: actions/checkout@v4
       - uses: oven-sh/setup-bun@v2
-      - uses: actions/setup-java@v4
-        with:
-          distribution: temurin
-          java-version: 25
 
       - name: Lint the workflow scripts
         run: shellcheck .github/scripts/*.sh
 
       - name: Build all plugins
-        run: ./gradlew --no-daemon packageAllPlugins
-        env:
-          GITHUB_TOKEN: ${{ secrets.READ_PACKAGES_TOKEN }} # For Gradle to download the API dependency. Read the warning above about this token.
+        run: bun install && bun run build && bun run package
 
       - name: Generate index from built artifacts
         run: |
