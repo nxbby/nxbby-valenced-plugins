@@ -1,5 +1,5 @@
 # A plugin is released when the published pool doesn't have `<id>@<version>.zip` for its manifest version.
-# The pool contains all relevant data. Git tags and GitHub releases are created for changelogs only.
+# The pool contains all relevant data. No git tags or GitHub releases are created.
 
 name: Release plugins
 
@@ -28,8 +28,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0 # Existing tags, so a re-run doesn't try to recreate one.
 
       - uses: oven-sh/setup-bun@v2
       - uses: actions/setup-java@v4
@@ -55,9 +53,3 @@ jobs:
       - name: Publish to the pool
         if: steps.plan.outputs.count != '0'
         run: .github/scripts/publish-pool.sh
-
-      - name: Tag and write changelogs
-        if: steps.plan.outputs.count != '0'
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: .github/scripts/tag-releases.sh
