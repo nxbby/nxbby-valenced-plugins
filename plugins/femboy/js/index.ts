@@ -1,7 +1,4 @@
 import { ToastActionCreators } from '@valenced/discord/actions'
-import { getModules } from '@valenced/modules/finders'
-import { withProps } from '@valenced/modules/finders/filters'
-import { after } from '@valenced/patcher'
 
 const FEED_URL =
 	'https://www.reddit.com/r/femboys/hot.json?limit=100&raw_json=1'
@@ -16,19 +13,6 @@ interface RedditPost {
 	is_self: boolean
 	stickied: boolean
 	spoiler?: boolean
-}
-
-interface CommandsModule {
-	getBuiltInCommands(...args: unknown[]): unknown
-}
-
-interface CommandArg {
-	name: string
-	value: unknown
-}
-
-interface CommandContext {
-	channel?: { nsfw?: boolean }
 }
 
 let cache: { at: number; posts: RedditPost[] } | undefined
@@ -47,9 +31,7 @@ async function fetchPosts(): Promise<RedditPost[]> {
 	const json = (await res.json()) as {
 		data: { children: { data: RedditPost }[] }
 	}
-	const posts = json.data.children
-		.map(c => c.data)
-		.filter(isImagePost)
+	const posts = json.data.children.map(c => c.data).filter(isImagePost)
 
 	cache = { at: Date.now(), posts }
 	return posts
@@ -72,71 +54,42 @@ function pick(posts: RedditPost[], nsfw: boolean) {
 	return pool[Math.floor(Math.random() * pool.length)]!
 }
 
-const command = {
-	// Discord's command search index expects a numeric id; set in start()
-	id: '-1000',
-	name: 'femboy',
-	displayName: 'femboy',
-	untranslatedName: 'femboy',
-	description: 'Send a random image from r/femboys',
-	displayDescription: 'Send a random image from r/femboys',
-	untranslatedDescription: 'Send a random image from r/femboys',
-	type: 1, // CHAT
-	inputType: 1, // BUILT_IN
-	applicationId: '-1',
-	options: [
-		{
-			name: 'nsfw',
-			displayName: 'nsfw',
-			type: 5, // BOOLEAN
-			description: 'Send an NSFW image (age-restricted channels only)',
-			displayDescription: 'Send an NSFW image (age-restricted channels only)',
-			required: false,
-		},
-	],
-	async execute(args: CommandArg[], ctx: CommandContext) {
-		const nsfw = args.find(a => a.name === 'nsfw')?.value === true
-
-		if (nsfw && !ctx.channel?.nsfw) {
-			toast('NSFW images can only be sent in age-restricted channels.')
-			return
-		}
-
-		try {
-			const post = pick(await fetchPosts(), nsfw)
-			if (!post) {
-				toast(`No ${nsfw ? 'NSFW' : 'SFW'} images found right now.`)
-				return
-			}
-			lastUrl = post.url
-			// Discord embeds the image from the direct link
-			return { content: post.url }
-		} catch (e) {
-			toast('Could not load images from Reddit.')
-			console.error('[femboy]', e)
-		}
-	},
-}
-
 export default plugin({
-	start({ cleanup, logger }) {
+	start({ cleanup, commands }) {
 		cleanup(
-			getModules(withProps<CommandsModule>('getBuiltInCommands'), commands => {
-				try {
-					cleanup(
-						after(commands, 'getBuiltInCommands', (_, ret) => {
-							if (!Array.isArray(ret)) return ret
-							// Take an id just below the lowest built-in command id
-							const ids = ret
-								.map(c => Number.parseInt((c as { id?: string })?.id ?? '', 10))
-								.filter(Number.isFinite)
-							if (ids.length) command.id = String(Math.min(...ids) - 1)
-							return [...ret, command]
-						}),
-					)
-				} catch (e) {
-					logger.error('Failed to register /femboy', e)
-				}
+			commands.register({
+				name: 'femboy',
+				description: 'Send a random image from r/femboys',
+				options: [
+					{
+						name: 'nsfw',
+						description: 'Send an NSFW image (age-restricted channels only)',
+						type: 5, // BOOLEAN
+						required: false,
+					},
+				],
+				async execute(args, ctx) {
+					const nsfw = args.find(a => a.name === 'nsfw')?.value === true
+
+					if (nsfw && !ctx.channel?.nsfw) {
+						toast('NSFW images can only be sent in age-restricted channels.')
+						return
+					}
+
+					try {
+						const post = pick(await fetchPosts(), nsfw)
+						if (!post) {
+							toast(`No ${nsfw ? 'NSFW' : 'SFW'} images found right now.`)
+							return
+						}
+						lastUrl = post.url
+						// Discord embeds the image from the direct link
+						return { content: post.url }
+					} catch (e) {
+						toast('Could not load images from Reddit.')
+						console.error('[femboy]', e)
+					}
+				},
 			}),
 		)
 	},
