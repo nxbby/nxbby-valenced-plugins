@@ -1,19 +1,35 @@
-import { getModules } from '@valenced/modules/finders'
+import { getModules, lookupModule } from '@valenced/modules/finders'
 import { withProps } from '@valenced/modules/finders/filters'
-import { after } from '@valenced/patcher'
+import { instead } from '@valenced/patcher'
 
 import type { Command } from '../../../types/nxbby-command-lib'
+
+// ApplicationCommandType.CHAT
+const CHAT = 1
+// Ids just need to be unique, numeric strings that don't clash with Discord's
+const ID_BASE = -48_200_000
 
 interface CommandsModule {
 	getBuiltInCommands(...args: unknown[]): unknown
 }
 
-type RawCommand = Record<string, unknown> & { id?: string }
+type RawCommand = Record<string, unknown> & { id: string }
 
 const registered: Command[] = []
 // Built command objects are cached so React sees stable references
 const built = new Map<Command, RawCommand>()
-let loggedTemplate = false
+let seq = 0
+
+function enumValue(name: string, key: string, fallback: number): number {
+	try {
+		const [mod] = lookupModule(
+			withProps<Record<string, Record<string, number>>>(name),
+		)
+		return mod?.[name]?.[key] ?? fallback
+	} catch {
+		return fallback
+	}
+}
 
 function register(command: Command) {
 	registered.push(command)
@@ -24,43 +40,26 @@ function register(command: Command) {
 	}
 }
 
-/**
- * Builds a command by copying a real built-in command first, so every field
- * Discord's command list and search index expect is present.
- */
-function build(
-	command: Command,
-	builtIns: RawCommand[],
-	index: number,
-): RawCommand {
+function build(command: Command): RawCommand {
 	const cached = built.get(command)
 	if (cached) return cached
 
-	const template =
-		builtIns.find(c => c.applicationId === '-1') ?? builtIns[0] ?? {}
-
-	const ids = builtIns
-		.map(c => Number.parseInt(c.id ?? '', 10))
-		.filter(Number.isFinite)
-	// Take ids just below the lowest built-in command id
-	const id = String((ids.length ? Math.min(...ids) : 0) - 1 - index)
-
 	const result: RawCommand = {
-		...template,
-		id,
-		name: command.name,
-		displayName: command.name,
+		id: String(ID_BASE - seq++),
 		untranslatedName: command.name,
-		description: command.description,
-		displayDescription: command.description,
+		displayName: command.name,
 		untranslatedDescription: command.description,
-		type: 1, // CHAT
-		inputType: 1, // BUILT_IN
+		displayDescription: command.description,
+		type: CHAT,
+		inputType: enumValue('ApplicationCommandInputType', 'BUILT_IN_TEXT', 1),
 		applicationId: '-1',
 		options: (command.options ?? []).map(o => ({
-			...o,
+			name: o.name,
 			displayName: o.displayName ?? o.name,
+			description: o.description,
 			displayDescription: o.displayDescription ?? o.description,
+			type: o.type,
+			required: o.required ?? false,
 		})),
 		execute: command.execute,
 	}
@@ -75,28 +74,28 @@ export default plugin({
 			getModules(withProps<CommandsModule>('getBuiltInCommands'), commands => {
 				try {
 					cleanup(
-						after(commands, 'getBuiltInCommands', (args, ret) => {
-							if (!Array.isArray(ret) || !registered.length) return ret
+						instead(commands, 'getBuiltInCommands', (args, orig, self) => {
+							const result = (orig as (...a: unknown[]) => unknown).apply(
+								self,
+								args as unknown[],
+							)
 							try {
-								const extra = registered.map((c, i) =>
-									build(c, ret as RawCommand[], i),
-								)
-								if (!loggedTemplate) {
-									loggedTemplate = true
-									// Diagnostic: shows what Discord's own commands look like
-									const dump = (v: unknown) =>
-										JSON.stringify(v, (_, x) =>
-											typeof x === 'function' ? '[fn]' : x,
-										)?.slice(0, 1500)
-									logger.log(`args: ${dump(args)} | built-ins: ${ret.length}`)
-									logger.log(`built-in[0]: ${dump(ret[0])}`)
-									logger.log(`ours[0]: ${dump(extra[0])}`)
-								}
-								return [...ret, ...extra]
+								// Only add to lists that include chat (slash) commands
+								const types = (args as unknown[])[0]
+								const wantsChat = Array.isArray(types)
+									? types.includes(CHAT)
+									: types == null || types === CHAT
+								if (!wantsChat || !Array.isArray(result) || !registered.length)
+									return result
+
+								const mine = registered
+									.map(build)
+									.filter(c => !result.some(r => r?.id === c.id))
+								return mine.length ? [...result, ...mine] : result
 							} catch (e) {
 								// Never break the chat input over a bad command
-								logger.error('Failed to build commands', e)
-								return ret
+								logger.error('Failed to add commands', e)
+								return result
 							}
 						}),
 					)

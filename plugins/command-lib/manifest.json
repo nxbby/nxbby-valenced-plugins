@@ -5,7 +5,7 @@
 	"description": "Library plugin that lets other plugins register slash commands. Installed automatically as a dependency.",
 	"author": "nxbby",
 	"icon": "ImageIcon",
-	"version": "1.0.1",
+	"version": "1.0.2",
 	"dependencies": {
 		"valenced.api": {
 			"version": ">=1 <2"
