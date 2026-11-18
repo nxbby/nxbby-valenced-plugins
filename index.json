@@ -59,7 +59,7 @@
       "author": "nxbby",
       "icon": "ImageIcon",
       "channels": {
-        "latest": "0.2.0"
+        "latest": "0.2.1"
       },
       "versions": {
         "0.1.0": {
@@ -92,6 +92,22 @@
           "url": "https://nxbby.github.io/nxbby-valenced-plugins/pool/dev.nxbby.femboy@0.2.0.zip",
           "sha256": "9ac96dcfc1ce383f349dedb9dec7254a6fad2473c83eb7d98fc3267ab5c13df4",
           "size": 1332,
+          "dependencies": {
+            "valenced.api": {
+              "version": ">=1 <2"
+            },
+            "discord": {
+              "version": "*"
+            },
+            "dev.nxbby.command-lib": {
+              "version": ">=1 <2"
+            }
+          }
+        },
+        "0.2.1": {
+          "url": "https://nxbby.github.io/nxbby-valenced-plugins/pool/dev.nxbby.femboy@0.2.1.zip",
+          "sha256": "0ae7539dd20762fe6b49ce5727e45188df15223df84290232a157bcc9e567e67",
+          "size": 1632,
           "dependencies": {
             "valenced.api": {
               "version": ">=1 <2"
