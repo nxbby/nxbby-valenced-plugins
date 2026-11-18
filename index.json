@@ -1,6 +1,58 @@
 {
-    "format": 1,
-    "name": "nxbby's plugins",
-    "description": "valenced plugins by nxbby",
-    "plugins": {}
+  "format": 1,
+  "name": "nxbby's plugins",
+  "description": "valenced plugins by nxbby",
+  "plugins": {
+    "dev.nxbby.command-lib": {
+      "name": "nxbby's Command Lib",
+      "description": "Library plugin that lets other plugins register slash commands. Installed automatically as a dependency.",
+      "author": "nxbby",
+      "icon": "ImageIcon",
+      "channels": {
+        "latest": "1.0.0"
+      },
+      "versions": {
+        "1.0.0": {
+          "url": "https://nxbby.github.io/nxbby-valenced-plugins/pool/dev.nxbby.command-lib@1.0.0.zip",
+          "sha256": "dbe6afc78d089bdb9efe276c5ce9c5d0351398dd609492974f79ac161feb9458",
+          "size": 1278,
+          "dependencies": {
+            "valenced.api": {
+              "version": ">=1 <2"
+            },
+            "discord": {
+              "version": "*"
+            }
+          }
+        }
+      }
+    },
+    "dev.nxbby.femboy": {
+      "name": "Femboy",
+      "description": "Adds a /femboy slash command that posts a random image from r/sfwfeminineboys, or from r/femboys with the nsfw option in age-restricted channels.",
+      "author": "nxbby",
+      "icon": "ImageIcon",
+      "channels": {
+        "latest": "1.0.0"
+      },
+      "versions": {
+        "1.0.0": {
+          "url": "https://nxbby.github.io/nxbby-valenced-plugins/pool/dev.nxbby.femboy@1.0.0.zip",
+          "sha256": "49948e384b0e6a3a6a734a131f51a327c449d571cf24ccf2676ef2e855b1eed5",
+          "size": 2178,
+          "dependencies": {
+            "valenced.api": {
+              "version": ">=1 <2"
+            },
+            "discord": {
+              "version": "*"
+            },
+            "dev.nxbby.command-lib": {
+              "version": ">=1 <2"
+            }
+          }
+        }
+      }
+    }
+  }
 }
