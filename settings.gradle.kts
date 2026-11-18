@@ -27,7 +27,7 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "valenced-plugin-template"
+rootProject.name = "nxbby-valenced-plugins"
 
 val pluginRoots = listOf("plugins", "themes")
 

@@ -300,7 +300,7 @@ val buildJs = tasks.register("buildJs") {
     description = "Builds every plugin's JS bundle via the valenced-plugin CLI."
 }
 
-// `-Pdev` builds unminified bundles with __DEV__ set, e.g. `./gradlew packageExamplePlugin -Pdev`.
+// `-Pdev` builds unminified bundles with __DEV__ set, e.g. `./gradlew packageFemboy -Pdev`.
 val jsDev = providers.gradleProperty("dev").map { it != "false" }.orElse(false)
 
 fun taskSuffix(dirName: String): String =
