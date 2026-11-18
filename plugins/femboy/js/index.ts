@@ -73,11 +73,14 @@ function pick(posts: RedditPost[], nsfw: boolean) {
 }
 
 const command = {
-	id: 'valenced-femboy',
+	// Discord's command search index expects a numeric id; set in start()
+	id: '-1000',
 	name: 'femboy',
 	displayName: 'femboy',
+	untranslatedName: 'femboy',
 	description: 'Send a random image from r/femboys',
 	displayDescription: 'Send a random image from r/femboys',
+	untranslatedDescription: 'Send a random image from r/femboys',
 	type: 1, // CHAT
 	inputType: 1, // BUILT_IN
 	applicationId: '-1',
@@ -121,9 +124,15 @@ export default plugin({
 			getModules(withProps<CommandsModule>('getBuiltInCommands'), commands => {
 				try {
 					cleanup(
-						after(commands, 'getBuiltInCommands', (_, ret) =>
-							Array.isArray(ret) ? [...ret, command] : ret,
-						),
+						after(commands, 'getBuiltInCommands', (_, ret) => {
+							if (!Array.isArray(ret)) return ret
+							// Take an id just below the lowest built-in command id
+							const ids = ret
+								.map(c => Number.parseInt((c as { id?: string })?.id ?? '', 10))
+								.filter(Number.isFinite)
+							if (ids.length) command.id = String(Math.min(...ids) - 1)
+							return [...ret, command]
+						}),
 					)
 				} catch (e) {
 					logger.error('Failed to register /femboy', e)
